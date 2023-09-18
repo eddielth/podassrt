@@ -1,4 +1,4 @@
-module github.com/eddielth/pod_association_restart
+module github.com/eddielth/podassrt
 
 go 1.19
 
