@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podassrt
+  namespace: default
+  labels:
+    app: podassrt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: podassrt
+  template:
+    metadata:
+      name: podassrt
+      labels:
+        app: podassrt
+    spec:
+      serviceAccountName: podassrt
+      containers:
+        - name: podassrt
+          image: {your image}
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /app/res
+              name: podassrt
+      restartPolicy: Always
+      volumes:
+        - name: podassrt
+          configMap:
+            name: podassrt
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: default
+  name: podassrt
+data:
+  configuration.toml: |
+    [Common]
+    KubeConfigFile = "~/.kube/config"
+    Namespace = ""
+    LabelKey = "app"
+
+    [[RestartPolicy]]
+    Name = "your app name"
+    Targets = ["another name1", "another name2"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: podassrt
+subjects:
+  - kind: ServiceAccount
+    name: podassrt
+    namespace: "default"
+roleRef:
+  kind: ClusterRole
+  name: podassrt
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: podassrt
+  labels:
+    app: podassrt
+rules:
+  - apiGroups: [ "apps" ]
+    resources: [ "deployments" ]
+    verbs: [ "get", "list", "watch", "create", "update", "patch", "delete" ]
+  - apiGroups: [ "" ]
+    resources: [ "services", "configmaps" ,"pods" ]
+    verbs: [ "get", "list", "watch", "create", "update", "patch", "delete" ]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: default
+  name: podassrt
+  labels:
+    app: podassrt

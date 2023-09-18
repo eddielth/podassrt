@@ -1,0 +1,8 @@
+[Common]
+KubeConfigFile = "~/.kube/config"
+Namespace = ""
+LabelKey = "app"
+
+[[RestartPolicy]]
+Name = "your app name"
+Targets = ["another name1", "another name2"]
